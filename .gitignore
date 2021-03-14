@@ -70,3 +70,4 @@ tests/18-coap-lwm2m/leshan-server-demo*.jar
 
 # ignore archives .tar.gz
 *.tar.gz
+build/
