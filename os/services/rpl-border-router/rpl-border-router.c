@@ -33,6 +33,8 @@
 #include "contiki.h"
 #include "net/routing/routing.h"
 #include "rpl-border-router.h"
+#include "net/pednet/pednet-routing.h"
+#include "net/pednet/pednet-er.h"
 
 /* Log configuration */
 #include "sys/log.h"
@@ -63,9 +65,15 @@ print_local_addresses(void)
 void
 set_prefix_64(uip_ipaddr_t *prefix_64)
 {
+  LOG_INFO("ooooook.........");
   prefix_set = 1;
   NETSTACK_ROUTING.root_set_prefix(prefix_64, NULL);
   NETSTACK_ROUTING.root_start();
+
+  #ifdef NETSTACK_CONF_WITH_PED
+  PEDNET_ROUTING.set_prefix(prefix_64, NULL);
+  PEDNET_ROUTING.root_start();
+  #endif
 }
 /*---------------------------------------------------------------------------*/
 void

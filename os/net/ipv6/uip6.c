@@ -1271,6 +1271,7 @@ uip_process(uint8_t flag)
       goto drop;
     }
   }
+  LOG_INFO("REACHED HERE \n");
 #else /* UIP_CONF_ROUTER */
   if(!uip_ds6_is_my_addr(&UIP_IP_BUF->destipaddr) &&
      !uip_ds6_is_my_maddr(&UIP_IP_BUF->destipaddr) &&

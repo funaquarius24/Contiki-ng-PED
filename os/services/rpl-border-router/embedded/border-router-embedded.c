@@ -37,6 +37,9 @@
 
 #include "contiki.h"
 #include "net/routing/routing.h"
+#ifdef NETSTACK_NETWORK1
+#include "net/pednet/pednet-routing.h"
+#endif
 #if PLATFORM_SUPPORTS_BUTTON_HAL
 #include "dev/button-hal.h"
 #else
@@ -69,6 +72,15 @@ PROCESS_THREAD(border_router_process, ev, data)
  */
   prefix_set = 0;
   NETSTACK_MAC.off();
+
+  #ifdef NETSTACK_NETWORK1
+    if(ped_node_is_er()){
+      NETSTACK_MAC.on();
+    }
+  #endif
+
+  
+
 
   PROCESS_PAUSE();
 

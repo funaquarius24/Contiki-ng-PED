@@ -96,10 +96,27 @@
 #define RPL_CODE_DIO                   0x01   /* DAG Information Option */
 #define RPL_CODE_DAO                   0x02   /* Destination Advertisement Option */
 #define RPL_CODE_DAO_ACK               0x03   /* DAO acknowledgment */
+//////////////////////
+#define PED_CODE_NODE_NEW              0x04   /* ism Node new message */
+#define PED_CODE_ROUTER_NEW            0x05   /* ism Router new message */
+#define PED_CODE_ER_ADDR_PARAM         0x06   /* ism ER address parameter message EAP */
+#define PED_CODE_ROUTER_ADDR_PARAM     0x07   /* ism Router address parameter message RAP */
+#define PED_CODE_NODE_NEW_ACK          0x08   /* ism Node new acknowledgement message */
+#define PED_CODE_ROUTER_NEW_ACK        0x09   /* ism Router new acknowledgement message */
+///////////////////////
 #define RPL_CODE_SEC_DIS               0x80   /* Secure DIS */
 #define RPL_CODE_SEC_DIO               0x81   /* Secure DIO */
 #define RPL_CODE_SEC_DAO               0x82   /* Secure DAO */
 #define RPL_CODE_SEC_DAO_ACK           0x83   /* Secure DAO-ACK */
+
+/* ism PED Failure detection messages */
+#define PED_NODE_ALIVE                     0x0A
+#define PED_NODE_UNREACHABLE               0x0B
+#define PED_NODE_MOBILE                    0x0C
+#define PED_NODE_FAILED                    0x0D
+#define PED_ROUTER_ALIVE                   0x0E
+#define PED_ROUTER_UNREACHABLE             0x0F
+///////////////////////////////////////////
 
 /* RPL control message options. */
 #define RPL_OPTION_PAD1                  0

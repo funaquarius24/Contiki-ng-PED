@@ -40,6 +40,11 @@
 #include "net/netstack.h"
 #include "lib/list.h"
 
+/* Log configuration */
+#include "sys/log.h"
+#define LOG_MODULE "PED"
+#define LOG_LEVEL LOG_LEVEL_INFO
+
 /* The list of IP processors that will process IP packets before uip or after */
 LIST(ip_processor_list);
 
@@ -89,5 +94,9 @@ netstack_init(void)
   NETSTACK_RADIO.init();
   NETSTACK_MAC.init();
   NETSTACK_NETWORK.init();
+
+  #ifdef NETSTACK_NETWORK1
+    NETSTACK_NETWORK1.init();
+  #endif
 }
 /*---------------------------------------------------------------------------*/

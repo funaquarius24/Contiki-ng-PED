@@ -87,6 +87,9 @@ typedef enum {
 	NBR_TABLE_REASON_LLSEC,
 	NBR_TABLE_REASON_LINK_STATS,
   NBR_TABLE_REASON_SIXTOP,
+  NBR_TABLE_REASON_PED_NODE_NEW,
+  NBR_TABLE_REASON_PED_ADDR_PARAM,
+
 } nbr_table_reason_t;
 
 /** \name Neighbor tables: register and loop through table elements */

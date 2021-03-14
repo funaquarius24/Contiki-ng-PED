@@ -75,6 +75,7 @@
 #include "net/queuebuf.h"
 
 #include "net/routing/routing.h"
+#include "net/pednet/pednet.h"
 
 /* Log configuration */
 #include "sys/log.h"
@@ -154,6 +155,10 @@
  * access different fields by updating the offset packetbuf_hdr_len.
  */
 static uint8_t *packetbuf_ptr;
+
+// #ifdef NETSTACK_NETWORK1
+// static int sent;
+// #endif
 
 /**
  * packetbuf_hdr_len is the total length of (the processed) 6lowpan headers
@@ -1504,6 +1509,12 @@ send_packet(linkaddr_t *dest)
   /* Provide a callback function to receive the result of
      a packet transmission. */
   NETSTACK_MAC.send(&packet_sent, NULL);
+  // #ifdef NETSTACK_NETWORK1
+  // if(!sent){
+  //   // NETSTACK_NETWORK1.output(NULL);
+  //   sent = 1;
+  // }
+  // #endif
 
   /* If we are sending multiple packets in a row, we need to let the
      watchdog know that we are still alive. */

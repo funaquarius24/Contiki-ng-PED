@@ -54,6 +54,7 @@
 #include "deployment/deployment.h"
 
 int curr_log_level_rpl = LOG_CONF_LEVEL_RPL;
+int curr_log_level_ped = LOG_CONF_LEVEL_PED;
 int curr_log_level_tcpip = LOG_CONF_LEVEL_TCPIP;
 int curr_log_level_ipv6 = LOG_CONF_LEVEL_IPV6;
 int curr_log_level_6lowpan = LOG_CONF_LEVEL_6LOWPAN;
@@ -68,6 +69,7 @@ int curr_log_level_main = LOG_CONF_LEVEL_MAIN;
 
 struct log_module all_modules[] = {
   {"rpl", &curr_log_level_rpl, LOG_CONF_LEVEL_RPL},
+  {"ped", &curr_log_level_ped, LOG_CONF_LEVEL_PED},
   {"tcpip", &curr_log_level_tcpip, LOG_CONF_LEVEL_TCPIP},
   {"ipv6", &curr_log_level_ipv6, LOG_CONF_LEVEL_IPV6},
   {"6lowpan", &curr_log_level_6lowpan, LOG_CONF_LEVEL_6LOWPAN},

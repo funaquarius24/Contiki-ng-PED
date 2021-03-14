@@ -3,7 +3,7 @@ all: $(CONTIKI_PROJECT)
 CONTIKI = ../..
 
 # The BR is either native or embedded, and in the latter case must support SLIP
-PLATFORMS_EXCLUDE = nrf52dk z1
+PLATFORMS_EXCLUDE = nrf52dk 
 
 # Include RPL BR module
 include $(CONTIKI)/Makefile.dir-variables
@@ -13,5 +13,6 @@ MODULES_REL += webserver
 # Include optional target-specific module
 include $(CONTIKI)/Makefile.identify-target
 MODULES_REL += $(TARGET)
-
+MAKE_ROUTING = MAKE_ROUTING_NULLROUTING
+WITH_PED = 1
 include $(CONTIKI)/Makefile.include

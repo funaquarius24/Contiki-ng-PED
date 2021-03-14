@@ -113,6 +113,10 @@
 #define LOG_CONF_LEVEL_RPL                         LOG_LEVEL_NONE /* Only for rpl-lite */
 #endif /* LOG_CONF_LEVEL_RPL */
 
+#ifndef LOG_CONF_LEVEL_PED
+#define LOG_CONF_LEVEL_PED                         LOG_LEVEL_NONE /* Only for PED */
+#endif /* LOG_CONF_LEVEL_PED */
+
 #ifndef LOG_CONF_LEVEL_TCPIP
 #define LOG_CONF_LEVEL_TCPIP                       LOG_LEVEL_NONE
 #endif /* LOG_CONF_LEVEL_TCPIP */

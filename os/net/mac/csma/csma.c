@@ -44,6 +44,8 @@
 #include "net/packetbuf.h"
 #include "net/netstack.h"
 
+#include "net/pednet/pednet-routing.h"
+
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "CSMA"
@@ -71,9 +73,21 @@ send_packet(mac_callback_t sent, void *ptr)
   csma_output_packet(sent, ptr);
 }
 /*---------------------------------------------------------------------------*/
+void
+pednet_packetbuf_addr_in_class(void)
+{
+  
+  /* if(PEDNET_ROUTING.addr_in_class(packetbuf_addr(PACKETBUF_ADDR_RECEIVER))){
+    
+  } */
+            
+}
+
+/*---------------------------------------------------------------------------*/
 static void
 input_packet(void)
 {
+  // LOG_INFO("RECEIVED!!!!!!!!!!!\n");
 #if CSMA_SEND_SOFT_ACK
   uint8_t ackdata[CSMA_ACK_LEN];
 #endif
@@ -116,6 +130,10 @@ input_packet(void)
       LOG_INFO_LLADDR(packetbuf_addr(PACKETBUF_ADDR_SENDER));
       LOG_INFO_(", seqno %u, len %u\n", packetbuf_attr(PACKETBUF_ATTR_MAC_SEQNO), packetbuf_datalen());
       NETSTACK_NETWORK.input();
+
+      #ifdef NETSTACK_NETWORK1
+      NETSTACK_NETWORK1.input();
+      #endif
     }
   }
 }

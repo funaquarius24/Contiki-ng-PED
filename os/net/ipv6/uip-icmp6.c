@@ -46,7 +46,8 @@
 #include "net/ipv6/uip-ds6.h"
 #include "net/ipv6/uip-icmp6.h"
 #include "contiki-default-conf.h"
-#include "net/routing/routing.h"
+#include "net/routing/routing.h" 
+#include "../sys/node-id.h"
 
 /* Log configuration */
 #include "sys/log.h"
@@ -93,6 +94,7 @@ uip_icmp6_input(uint8_t type, uint8_t icode)
   if(handler->handler == NULL) {
     return UIP_ICMP6_INPUT_ERROR;
   }
+  
 
   handler->handler();
   return UIP_ICMP6_INPUT_SUCCESS;
@@ -125,7 +127,7 @@ echo_request_input(void)
     uip_ipaddr_copy(&UIP_IP_BUF->destipaddr, &UIP_IP_BUF->srcipaddr);
     uip_ds6_select_src(&UIP_IP_BUF->srcipaddr, &UIP_IP_BUF->destipaddr);
   } else {
-    uip_ipaddr_copy(&tmp_ipaddr, &UIP_IP_BUF->srcipaddr);
+    uip_ipaddr_copy(&tmp_ipaddr, &UIP_IP_BUF->srcipaddr); 
     uip_ipaddr_copy(&UIP_IP_BUF->srcipaddr, &UIP_IP_BUF->destipaddr);
     uip_ipaddr_copy(&UIP_IP_BUF->destipaddr, &tmp_ipaddr);
   }
@@ -227,7 +229,7 @@ uip_icmp6_error_output(uint8_t type, uint8_t code, uint32_t param)
 
 /*---------------------------------------------------------------------------*/
 void
-uip_icmp6_send(const uip_ipaddr_t *dest, int type, int code, int payload_len)
+uip_icmp6_send(const uip_ipaddr_t *dest, int type, int code, int payload_len) 
 {
   UIP_IP_BUF->vtc = 0x60;
   UIP_IP_BUF->tcflow = 0;

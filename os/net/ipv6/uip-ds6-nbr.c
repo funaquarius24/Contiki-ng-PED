@@ -179,7 +179,7 @@ uip_ds6_nbr_add(const uip_ipaddr_t *ipaddr, const uip_lladdr_t *lladdr,
 #else
   nbr = nbr_table_add_lladdr(ds6_neighbors, (linkaddr_t*)lladdr, reason, data);
 #endif /* UIP_DS6_NBR_MULTI_IPV6_ADDRS */
-
+  
   if(nbr) {
     uip_ipaddr_copy(&nbr->ipaddr, ipaddr);
 #if UIP_ND6_SEND_RA || !UIP_CONF_ROUTER

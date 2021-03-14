@@ -178,7 +178,7 @@
 #ifdef RPL_CONF_PROBING_SEND_FUNC
 #define RPL_PROBING_SEND_FUNC RPL_CONF_PROBING_SEND_FUNC
 #else
-#define RPL_PROBING_SEND_FUNC(addr) rpl_icmp6_dio_output((addr))
+#define RPL_PROBING_SEND_FUNC(addr) rpl_icmp6_dio_output((addr)) 
 #endif
 
 /*
@@ -215,6 +215,50 @@
 #else
 #define RPL_DIO_INTERVAL_MIN        12
 #endif
+
+
+
+#if WITH_PED
+/* Interval of node_new transmission  */
+#ifdef RPL_CONF_NODE_NEW_INTERVAL
+#define RPL_NODE_NEW_INTERVAL                RPL_CONF_NODE_NEW_INTERVAL
+#else
+#define RPL_NODE_NEW_INTERVAL                (30 * CLOCK_SECOND)
+#endif
+
+/* Interval of router_new transmission  */
+#ifdef RPL_CONF_ROUTER_NEW_INTERVAL
+#define RPL_ROUTER_NEW_INTERVAL                RPL_CONF_ROUTER_NEW_INTERVAL
+#else
+#define RPL_ROUTER_NEW_INTERVAL                (30 * CLOCK_SECOND)
+#endif
+
+#ifdef RPL_CONF_EAP_INTERVAL_MIN
+#define RPL_EAP_INTERVAL_MIN        RPL_CONF_EAP_INTERVAL_MIN
+#else
+#define RPL_EAP_INTERVAL_MIN        12
+#endif /* RPL_CONF_EAP_INTERVAL_MIN */
+
+#ifdef RPL_CONF_RAP_INTERVAL_MIN
+#define RPL_RAP_INTERVAL_MIN        RPL_CONF_RAP_INTERVAL_MIN
+#else
+#define RPL_RAP_INTERVAL_MIN        12
+#endif /* RPL_CONF_RAP_INTERVAL_MIN */
+
+#ifdef RPL_CONF_EAP_INTERVAL_DOUBLINGS
+#define RPL_EAP_INTERVAL_DOUBLINGS  RPL_CONF_EAP_INTERVAL_DOUBLINGS
+#else
+#define RPL_EAP_INTERVAL_DOUBLINGS  8
+#endif /* RPL_CONF_EAP_INTERVAL_DOUBLINGS */
+
+#ifdef RPL_CONF_RAP_INTERVAL_DOUBLINGS
+#define RPL_RAP_INTERVAL_DOUBLINGS  RPL_CONF_RAP_INTERVAL_DOUBLINGS
+#else
+#define RPL_RAP_INTERVAL_DOUBLINGS  8
+#endif /* RPL_CONF_EAP_INTERVAL_DOUBLINGS */
+
+#endif /* WITH_PED */
+
 
 /*
  * Maximum amount of timer doublings.

@@ -68,10 +68,18 @@
 #define NETSTACK_NETWORK sicslowpan_driver
 #elif NETSTACK_CONF_WITH_NULLNET
 #define NETSTACK_NETWORK nullnet_driver
+#elif NETSTACK_CONF_WITH_RIME
+#define NETSTACK_NETWORK rime_driver
 #else
 #error Unknown NET configuration
 #endif
 #endif /* NETSTACK_CONF_NETWORK */
+
+#ifdef NETSTACK_CONF_NETWORK1
+#define NETSTACK_NETWORK1 NETSTACK_CONF_NETWORK1
+#elif NETSTACK_CONF_WITH_PED
+#define NETSTACK_NETWORK1 pednet_driver
+#endif /* NETSTACK_CONF_NETWORK1 */
 
 /* MAC layer configuration. The MAC layer is configured through the Makefile,
    via the flag MAKE_MAC */
@@ -129,6 +137,20 @@ struct network_driver {
 
 extern const struct routing_driver NETSTACK_ROUTING;
 extern const struct network_driver NETSTACK_NETWORK;
+//#ifdef NETSTACK_NETWORK1
+#if PED_CONF_NODE_TYPE == 2
+#define PEDNET_ROUTING pednet_er_routing_driver
+#elif PED_CONF_NODE_TYPE == 1
+#define PEDNET_ROUTING pednet_r_routing_driver
+#else
+#define PEDNET_ROUTING pednet_leaf_routing_driver
+#endif
+extern const struct pednet_driver PEDNET_ROUTING;
+extern const struct network_driver NETSTACK_NETWORK1; /* support for ped as network layer */
+//#endif
+
+extern const struct pednet_driver PEDNET_ROUTING;   /* temporary */
+
 extern const struct mac_driver NETSTACK_MAC;
 extern const struct radio_driver NETSTACK_RADIO;
 extern const struct framer NETSTACK_FRAMER;

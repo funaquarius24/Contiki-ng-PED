@@ -41,20 +41,28 @@
 
 #include "net/routing/routing.h"
 
+/* Log configuration */
+#include "sys/log.h"
+#define LOG_MODULE "PED"
+#define LOG_LEVEL LOG_LEVEL_INFO
+
 /*---------------------------------------------------------------------------*/
 static void
 init(void)
 {
+  LOG_INFO("init");
 }
 /*---------------------------------------------------------------------------*/
 static void
 root_set_prefix(uip_ipaddr_t *prefix, uip_ipaddr_t *iid)
 {
+  LOG_INFO("root_set_prefix");
 }
 /*---------------------------------------------------------------------------*/
 static int
 root_start(void)
 {
+  LOG_INFO("root_start");
   return 0;
 }
 /*---------------------------------------------------------------------------*/
@@ -75,7 +83,7 @@ get_sr_node_ipaddr(uip_ipaddr_t *addr, const uip_sr_node_t *node)
 {
   return 0;
 }
-/*---------------------------------------------------------------------------*/
+/*---------------------------------------------------------------------------*/ 
 static void
 leave_network(void)
 {
@@ -140,6 +148,7 @@ ext_header_srh_get_next_hop(uip_ipaddr_t *ipaddr)
 static void
 link_callback(const linkaddr_t *addr, int status, int numtx)
 {
+  
 }
 /*---------------------------------------------------------------------------*/
 static void

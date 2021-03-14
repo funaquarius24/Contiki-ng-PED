@@ -103,6 +103,15 @@ uip_ds6_nbr_t *rpl_icmp6_update_nbr_table(uip_ipaddr_t *from, nbr_table_reason_t
  * Else, a multicast DIS will be sent.
 */
 void rpl_icmp6_dis_output(uip_ipaddr_t *addr);
+#if WITH_PED
+void rpl_icmp6_node_new_output(uip_ipaddr_t *addr); // ism for node_new
+void rpl_icmp6_router_new_output(uip_ipaddr_t *addr); // ism for router_new
+void rpl_icmp_rap_output(uip_ipaddr_t *uc_addr);         // ism Router address parameter output
+void rpl_icmp_eap_output(uip_ipaddr_t *uc_addr);         // ism Edge Router address parameter output
+void rpl_icmp6_router_new_ack_output(uip_ipaddr_t *uc_addr);
+void rpl_icmp6_node_new_ack_output(uip_ipaddr_t *uc_addr);
+
+#endif
 
 /**
  * Creates an ICMPv6 DIO packet and sends it. Can be unicast or multicast

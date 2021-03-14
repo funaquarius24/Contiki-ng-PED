@@ -203,4 +203,23 @@
 #define SICSLOWPAN_CONF_COMPRESSION SICSLOWPAN_COMPRESSION_IPHC
 #endif /* SICSLOWPAN_CONF_COMPRESSION */
 
+#if PED_CONF_NODE_TYPE == 3
+#define PED_LEAF 0
+#define PED_R 0
+#define PED_ER 0
+#define PED_ATT 1
+#elif PED_CONF_NODE_TYPE == 2
+#define PED_LEAF 0
+#define PED_R 0
+#define PED_ER 1
+#elif PED_CONF_NODE_TYPE == 1
+#define PED_LEAF 0
+#define PED_R 1
+#define PED_ER 0
+#else
+#define PED_LEAF 1
+#define PED_R 0
+#define PED_ER 0
+#endif
+
 #endif /* CONTIKI_DEFAULT_CONF_H */

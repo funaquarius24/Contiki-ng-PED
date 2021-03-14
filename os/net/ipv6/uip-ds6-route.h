@@ -101,6 +101,8 @@ void uip_ds6_notification_add(struct uip_ds6_notification *n,
 			      uip_ds6_notification_callback c);
 
 void uip_ds6_notification_rm(struct uip_ds6_notification *n);
+
+void uip_ds6_defrt_clear();
 /*--------------------------------------------------*/
 #endif
 

@@ -709,6 +709,8 @@ tcpip_ipv6_output(void)
   }
 
 #if UIP_ND6_SEND_NS
+
+  LOG_INFO("NS SENDABLE");
   if(nbr->state == NBR_INCOMPLETE) {
     LOG_ERR("output: nbr cache entry incomplete\n");
     queue_packet(nbr);

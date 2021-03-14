@@ -48,6 +48,7 @@
 #include "net/ipv6/uip-icmp6.h"
 #include "net/packetbuf.h"
 #include "lib/random.h"
+#include "../sys/node-id.h"
 
 #include <limits.h>
 
@@ -67,11 +68,33 @@ static void dis_input(void);
 static void dio_input(void);
 static void dao_input(void);
 
+#if WITH_PED /* ISM with ped */
+static void node_new_input(void); // ism handler for node_new //
+static void router_new_input(void); /* ism handler for router_new */
+static void eap_input(void);        // ism handler for Edge Router Address Parameter //
+static void rap_input(void);        // ism handler for Router Address Parameter //
+static void node_new_ack_input(void);
+static void router_new_ack_input(void);
+
+#endif /* ISM with ped */
+
 /*---------------------------------------------------------------------------*/
 /* Initialize RPL ICMPv6 message handlers */
 UIP_ICMP6_HANDLER(dis_handler, ICMP6_RPL, RPL_CODE_DIS, dis_input);
 UIP_ICMP6_HANDLER(dio_handler, ICMP6_RPL, RPL_CODE_DIO, dio_input);
 UIP_ICMP6_HANDLER(dao_handler, ICMP6_RPL, RPL_CODE_DAO, dao_input);
+
+/* ism ------------------------------------------------------------------------ */
+#if WITH_PED
+UIP_ICMP6_HANDLER(node_new_handler, ICMP6_RPL, PED_CODE_NODE_NEW, node_new_input);
+UIP_ICMP6_HANDLER(router_new_handler, ICMP6_RPL, PED_CODE_ROUTER_NEW, router_new_input);
+UIP_ICMP6_HANDLER(eap_handler, ICMP6_RPL, PED_CODE_ER_ADDR_PARAM, eap_input);
+UIP_ICMP6_HANDLER(rap_handler, ICMP6_RPL, PED_CODE_ROUTER_ADDR_PARAM, rap_input);
+UIP_ICMP6_HANDLER(node_new_ack_handler, ICMP6_RPL, PED_CODE_NODE_NEW_ACK, node_new_ack_input);
+UIP_ICMP6_HANDLER(router_new_ack_handler, ICMP6_RPL, PED_CODE_ROUTER_NEW_ACK, router_new_ack_input);
+#endif
+
+/////////////////////////////////////////////////////////////////////////////////
 
 #if RPL_WITH_DAO_ACK
 static void dao_ack_input(void);
@@ -145,6 +168,122 @@ dis_input(void)
   discard:
     uipbuf_clear();
 }
+
+/*---------------------------------------------------------------------------*/
+#if WITH_PED /* with ped */
+static void
+node_new_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("node_new_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a node_new from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+
+static void
+router_new_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("ROUTER_new_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a router_new from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+
+static void
+router_new_ack_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("ROUTER_new_ack_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a router_new_ack from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+
+static void
+node_new_ack_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("node_new_ack_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a node_new_ack from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+
+static void
+eap_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("EAP_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a EAP from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+
+static void
+rap_input(void)
+{
+  if(!curr_instance.used) {
+    LOG_WARN("RAP_input: not in an instance yet, discard\n");
+    goto discard;
+  }
+
+  LOG_INFO("received a RAP from ");
+  LOG_INFO_6ADDR(&UIP_IP_BUF->srcipaddr);
+  LOG_INFO_("\n");
+
+  rpl_process_dis(&UIP_IP_BUF->srcipaddr, uip_is_addr_mcast(&UIP_IP_BUF->destipaddr));
+
+  discard:
+    uipbuf_clear();
+} 
+/**
+static void fail_detect_input(){
+  
+}**/
+#endif /* with ped */
+
 /*---------------------------------------------------------------------------*/
 void
 rpl_icmp6_dis_output(uip_ipaddr_t *addr)
@@ -165,8 +304,669 @@ rpl_icmp6_dis_output(uip_ipaddr_t *addr)
   LOG_INFO_6ADDR(addr);
   LOG_INFO_("\n");
 
-  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIS, 2);
+  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIS, 2); 
 }
+/*---------------------------------------------------------------------------*/
+#if WITH_PED
+void
+rpl_icmp6_node_new_output(uip_ipaddr_t *addr)
+{
+  unsigned char *buffer;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[0] = buffer[1] = 0;
+
+  if(addr == NULL) {
+    addr = &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a Node_new to ");
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, PED_CODE_NODE_NEW, 2); 
+}
+
+void
+rpl_icmp6_router_new_output(uip_ipaddr_t *addr)
+{
+  unsigned char *buffer;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[0] = buffer[1] = 0;
+
+  if(addr == NULL) {
+    addr = &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a Router_new to ");
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, PED_CODE_ROUTER_NEW, 2); 
+}
+
+void
+rpl_icmp6_eap_output(uip_ipaddr_t *uc_addr)
+{
+  unsigned char *buffer;
+  int pos;
+  uip_ipaddr_t *addr = uc_addr;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  if(rpl_get_leaf_only()) {
+    /* In leaf mode, we only send DIO messages as unicasts in response to
+       unicast DIS messages. */
+    if(uc_addr == NULL) {
+      /* Do not send multicast DIO in leaf mode */
+      return;
+    }
+  }
+
+  /* DAG Information Object */
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[pos++] = curr_instance.instance_id;
+  buffer[pos++] = curr_instance.dag.version;
+
+  if(rpl_get_leaf_only()) {
+    set16(buffer, pos, RPL_INFINITE_RANK);
+  } else {
+    set16(buffer, pos, curr_instance.dag.rank);
+  }
+  pos += 2;
+
+  buffer[pos] = 0;
+  if(curr_instance.dag.grounded) {
+    buffer[pos] |= RPL_DIO_GROUNDED;
+  }
+
+  buffer[pos] |= curr_instance.mop << RPL_DIO_MOP_SHIFT;
+  buffer[pos] |= curr_instance.dag.preference & RPL_DIO_PREFERENCE_MASK;
+  pos++;
+
+  buffer[pos++] = curr_instance.dtsn_out;
+
+  /* reserved 2 bytes */
+  buffer[pos++] = 0; /* flags */
+  buffer[pos++] = 0; /* reserved */
+
+  memcpy(buffer + pos, &curr_instance.dag.dag_id, sizeof(curr_instance.dag.dag_id));
+  pos += 16;
+
+  if(!rpl_get_leaf_only()) {
+    if(curr_instance.mc.type != RPL_DAG_MC_NONE) {
+      buffer[pos++] = RPL_OPTION_DAG_METRIC_CONTAINER;
+      buffer[pos++] = 6;
+      buffer[pos++] = curr_instance.mc.type;
+      buffer[pos++] = curr_instance.mc.flags >> 1;
+      buffer[pos] = (curr_instance.mc.flags & 1) << 7;
+      buffer[pos++] |= (curr_instance.mc.aggr << 4) | curr_instance.mc.prec;
+      if(curr_instance.mc.type == RPL_DAG_MC_ETX) {
+        buffer[pos++] = 2;
+        set16(buffer, pos, curr_instance.mc.obj.etx);
+        pos += 2;
+      } else if(curr_instance.mc.type == RPL_DAG_MC_ENERGY) {
+        buffer[pos++] = 2;
+        buffer[pos++] = curr_instance.mc.obj.energy.flags;
+        buffer[pos++] = curr_instance.mc.obj.energy.energy_est;
+      } else {
+        LOG_ERR("unable to send DIO because of unsupported DAG MC type %u\n",
+               (unsigned)curr_instance.mc.type);
+        return;
+      }
+    }
+  }
+
+  /* Always add a DAG configuration option. */
+  buffer[pos++] = RPL_OPTION_DAG_CONF;
+  buffer[pos++] = 14;
+  buffer[pos++] = 0; /* No Auth, PCS = 0 */
+  buffer[pos++] = curr_instance.dio_intdoubl;
+  buffer[pos++] = curr_instance.dio_intmin;
+  buffer[pos++] = curr_instance.dio_redundancy;
+  set16(buffer, pos, curr_instance.max_rankinc);
+  pos += 2;
+  set16(buffer, pos, curr_instance.min_hoprankinc);
+  pos += 2;
+  /* OCP is in the DAG_CONF option */
+  set16(buffer, pos, curr_instance.of->ocp);
+  pos += 2;
+  buffer[pos++] = 0; /* reserved */
+  buffer[pos++] = curr_instance.default_lifetime;
+  set16(buffer, pos, curr_instance.lifetime_unit);
+  pos += 2;
+
+  /* Check if we have a prefix to send also. */
+  if(curr_instance.dag.prefix_info.length > 0) {
+    buffer[pos++] = RPL_OPTION_PREFIX_INFO;
+    buffer[pos++] = 30; /* always 30 bytes + 2 long */
+    buffer[pos++] = curr_instance.dag.prefix_info.length;
+    buffer[pos++] = curr_instance.dag.prefix_info.flags;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    memset(&buffer[pos], 0, 4);
+    pos += 4;
+    memcpy(&buffer[pos], &curr_instance.dag.prefix_info.prefix, 16);
+    pos += 16;
+  }
+
+  if(!rpl_get_leaf_only()) {
+    addr = addr != NULL ? addr : &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a %s-DIO with rank %u to ",
+         uc_addr != NULL ? "unicast" : "multicast",
+         (unsigned)curr_instance.dag.rank);
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIO, pos);
+}
+/*---------------------------------------------------------------------------*/
+void
+rpl_icmp6_rap_output(uip_ipaddr_t *uc_addr)
+{
+  unsigned char *buffer;
+  int pos;
+  uip_ipaddr_t *addr = uc_addr;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  if(rpl_get_leaf_only()) {
+    /* In leaf mode, we only send DIO messages as unicasts in response to
+       unicast DIS messages. */
+    if(uc_addr == NULL) {
+      /* Do not send multicast DIO in leaf mode */
+      return;
+    }
+  }
+
+  /* DAG Information Object */
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[pos++] = curr_instance.instance_id;
+  buffer[pos++] = curr_instance.dag.version;
+
+  if(rpl_get_leaf_only()) {
+    set16(buffer, pos, RPL_INFINITE_RANK);
+  } else {
+    set16(buffer, pos, curr_instance.dag.rank);
+  }
+  pos += 2;
+
+  buffer[pos] = 0;
+  if(curr_instance.dag.grounded) {
+    buffer[pos] |= RPL_DIO_GROUNDED;
+  }
+
+  buffer[pos] |= curr_instance.mop << RPL_DIO_MOP_SHIFT;
+  buffer[pos] |= curr_instance.dag.preference & RPL_DIO_PREFERENCE_MASK;
+  pos++;
+
+  buffer[pos++] = curr_instance.dtsn_out;
+
+  /* reserved 2 bytes */
+  buffer[pos++] = 0; /* flags */
+  buffer[pos++] = 0; /* reserved */
+
+  memcpy(buffer + pos, &curr_instance.dag.dag_id, sizeof(curr_instance.dag.dag_id));
+  pos += 16;
+
+  if(!rpl_get_leaf_only()) {
+    if(curr_instance.mc.type != RPL_DAG_MC_NONE) {
+      buffer[pos++] = RPL_OPTION_DAG_METRIC_CONTAINER;
+      buffer[pos++] = 6;
+      buffer[pos++] = curr_instance.mc.type;
+      buffer[pos++] = curr_instance.mc.flags >> 1;
+      buffer[pos] = (curr_instance.mc.flags & 1) << 7;
+      buffer[pos++] |= (curr_instance.mc.aggr << 4) | curr_instance.mc.prec;
+      if(curr_instance.mc.type == RPL_DAG_MC_ETX) {
+        buffer[pos++] = 2;
+        set16(buffer, pos, curr_instance.mc.obj.etx);
+        pos += 2;
+      } else if(curr_instance.mc.type == RPL_DAG_MC_ENERGY) {
+        buffer[pos++] = 2;
+        buffer[pos++] = curr_instance.mc.obj.energy.flags;
+        buffer[pos++] = curr_instance.mc.obj.energy.energy_est;
+      } else {
+        LOG_ERR("unable to send DIO because of unsupported DAG MC type %u\n",
+               (unsigned)curr_instance.mc.type);
+        return;
+      }
+    }
+  }
+
+  /* Always add a DAG configuration option. */
+  buffer[pos++] = RPL_OPTION_DAG_CONF;
+  buffer[pos++] = 14;
+  buffer[pos++] = 0; /* No Auth, PCS = 0 */
+  buffer[pos++] = curr_instance.dio_intdoubl;
+  buffer[pos++] = curr_instance.dio_intmin;
+  buffer[pos++] = curr_instance.dio_redundancy;
+  set16(buffer, pos, curr_instance.max_rankinc);
+  pos += 2;
+  set16(buffer, pos, curr_instance.min_hoprankinc);
+  pos += 2;
+  /* OCP is in the DAG_CONF option */
+  set16(buffer, pos, curr_instance.of->ocp);
+  pos += 2;
+  buffer[pos++] = 0; /* reserved */
+  buffer[pos++] = curr_instance.default_lifetime;
+  set16(buffer, pos, curr_instance.lifetime_unit);
+  pos += 2;
+
+  /* Check if we have a prefix to send also. */
+  if(curr_instance.dag.prefix_info.length > 0) {
+    buffer[pos++] = RPL_OPTION_PREFIX_INFO;
+    buffer[pos++] = 30; /* always 30 bytes + 2 long */
+    buffer[pos++] = curr_instance.dag.prefix_info.length;
+    buffer[pos++] = curr_instance.dag.prefix_info.flags;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    memset(&buffer[pos], 0, 4);
+    pos += 4;
+    memcpy(&buffer[pos], &curr_instance.dag.prefix_info.prefix, 16);
+    pos += 16;
+  }
+
+  if(!rpl_get_leaf_only()) {
+    addr = addr != NULL ? addr : &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a %s-DIO with rank %u to ",
+         uc_addr != NULL ? "unicast" : "multicast",
+         (unsigned)curr_instance.dag.rank);
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIO, pos);
+}
+/*---------------------------------------------------------------------------*/
+void
+rpl_icmp6_node_new_ack_output(uip_ipaddr_t *uc_addr)
+{
+  unsigned char *buffer;
+  int pos;
+  uip_ipaddr_t *addr = uc_addr;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  if(rpl_get_leaf_only()) {
+    /* In leaf mode, we only send DIO messages as unicasts in response to
+       unicast DIS messages. */
+    if(uc_addr == NULL) {
+      /* Do not send multicast DIO in leaf mode */
+      return;
+    }
+  }
+
+  /* DAG Information Object */
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[pos++] = curr_instance.instance_id;
+  buffer[pos++] = curr_instance.dag.version;
+
+  if(rpl_get_leaf_only()) {
+    set16(buffer, pos, RPL_INFINITE_RANK);
+  } else {
+    set16(buffer, pos, curr_instance.dag.rank);
+  }
+  pos += 2;
+
+  buffer[pos] = 0;
+  if(curr_instance.dag.grounded) {
+    buffer[pos] |= RPL_DIO_GROUNDED;
+  }
+
+  buffer[pos] |= curr_instance.mop << RPL_DIO_MOP_SHIFT;
+  buffer[pos] |= curr_instance.dag.preference & RPL_DIO_PREFERENCE_MASK;
+  pos++;
+
+  buffer[pos++] = curr_instance.dtsn_out;
+
+  /* reserved 2 bytes */
+  buffer[pos++] = 0; /* flags */
+  buffer[pos++] = 0; /* reserved */
+
+  memcpy(buffer + pos, &curr_instance.dag.dag_id, sizeof(curr_instance.dag.dag_id));
+  pos += 16;
+
+  if(!rpl_get_leaf_only()) {
+    if(curr_instance.mc.type != RPL_DAG_MC_NONE) {
+      buffer[pos++] = RPL_OPTION_DAG_METRIC_CONTAINER;
+      buffer[pos++] = 6;
+      buffer[pos++] = curr_instance.mc.type;
+      buffer[pos++] = curr_instance.mc.flags >> 1;
+      buffer[pos] = (curr_instance.mc.flags & 1) << 7;
+      buffer[pos++] |= (curr_instance.mc.aggr << 4) | curr_instance.mc.prec;
+      if(curr_instance.mc.type == RPL_DAG_MC_ETX) {
+        buffer[pos++] = 2;
+        set16(buffer, pos, curr_instance.mc.obj.etx);
+        pos += 2;
+      } else if(curr_instance.mc.type == RPL_DAG_MC_ENERGY) {
+        buffer[pos++] = 2;
+        buffer[pos++] = curr_instance.mc.obj.energy.flags;
+        buffer[pos++] = curr_instance.mc.obj.energy.energy_est;
+      } else {
+        LOG_ERR("unable to send DIO because of unsupported DAG MC type %u\n",
+               (unsigned)curr_instance.mc.type);
+        return;
+      }
+    }
+  }
+
+  /* Always add a DAG configuration option. */
+  buffer[pos++] = RPL_OPTION_DAG_CONF;
+  buffer[pos++] = 14;
+  buffer[pos++] = 0; /* No Auth, PCS = 0 */
+  buffer[pos++] = curr_instance.dio_intdoubl;
+  buffer[pos++] = curr_instance.dio_intmin;
+  buffer[pos++] = curr_instance.dio_redundancy;
+  set16(buffer, pos, curr_instance.max_rankinc);
+  pos += 2;
+  set16(buffer, pos, curr_instance.min_hoprankinc);
+  pos += 2;
+  /* OCP is in the DAG_CONF option */
+  set16(buffer, pos, curr_instance.of->ocp);
+  pos += 2;
+  buffer[pos++] = 0; /* reserved */
+  buffer[pos++] = curr_instance.default_lifetime;
+  set16(buffer, pos, curr_instance.lifetime_unit);
+  pos += 2;
+
+  /* Check if we have a prefix to send also. */
+  if(curr_instance.dag.prefix_info.length > 0) {
+    buffer[pos++] = RPL_OPTION_PREFIX_INFO;
+    buffer[pos++] = 30; /* always 30 bytes + 2 long */
+    buffer[pos++] = curr_instance.dag.prefix_info.length;
+    buffer[pos++] = curr_instance.dag.prefix_info.flags;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    memset(&buffer[pos], 0, 4);
+    pos += 4;
+    memcpy(&buffer[pos], &curr_instance.dag.prefix_info.prefix, 16);
+    pos += 16;
+  }
+
+  if(!rpl_get_leaf_only()) {
+    addr = addr != NULL ? addr : &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a %s-DIO with rank %u to ",
+         uc_addr != NULL ? "unicast" : "multicast",
+         (unsigned)curr_instance.dag.rank);
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIO, pos);
+}
+/*---------------------------------------------------------------------------*/
+void
+rpl_icmp6_router_new_ack_output(uip_ipaddr_t *uc_addr)
+{
+  unsigned char *buffer;
+  int pos;
+  uip_ipaddr_t *addr = uc_addr;
+
+  /* Make sure we're up-to-date before sending data out */
+  rpl_dag_update_state();
+
+  if(rpl_get_leaf_only()) {
+    /* In leaf mode, we only send DIO messages as unicasts in response to
+       unicast DIS messages. */
+    if(uc_addr == NULL) {
+      /* Do not send multicast DIO in leaf mode */
+      return;
+    }
+  }
+
+  /* DAG Information Object */
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  buffer[pos++] = curr_instance.instance_id;
+  buffer[pos++] = curr_instance.dag.version;
+
+  if(rpl_get_leaf_only()) {
+    set16(buffer, pos, RPL_INFINITE_RANK);
+  } else {
+    set16(buffer, pos, curr_instance.dag.rank);
+  }
+  pos += 2;
+
+  buffer[pos] = 0;
+  if(curr_instance.dag.grounded) {
+    buffer[pos] |= RPL_DIO_GROUNDED;
+  }
+
+  buffer[pos] |= curr_instance.mop << RPL_DIO_MOP_SHIFT;
+  buffer[pos] |= curr_instance.dag.preference & RPL_DIO_PREFERENCE_MASK;
+  pos++;
+
+  buffer[pos++] = curr_instance.dtsn_out;
+
+  /* reserved 2 bytes */
+  buffer[pos++] = 0; /* flags */
+  buffer[pos++] = 0; /* reserved */
+
+  memcpy(buffer + pos, &curr_instance.dag.dag_id, sizeof(curr_instance.dag.dag_id));
+  pos += 16;
+
+  if(!rpl_get_leaf_only()) {
+    if(curr_instance.mc.type != RPL_DAG_MC_NONE) {
+      buffer[pos++] = RPL_OPTION_DAG_METRIC_CONTAINER;
+      buffer[pos++] = 6;
+      buffer[pos++] = curr_instance.mc.type;
+      buffer[pos++] = curr_instance.mc.flags >> 1;
+      buffer[pos] = (curr_instance.mc.flags & 1) << 7;
+      buffer[pos++] |= (curr_instance.mc.aggr << 4) | curr_instance.mc.prec;
+      if(curr_instance.mc.type == RPL_DAG_MC_ETX) {
+        buffer[pos++] = 2;
+        set16(buffer, pos, curr_instance.mc.obj.etx);
+        pos += 2;
+      } else if(curr_instance.mc.type == RPL_DAG_MC_ENERGY) {
+        buffer[pos++] = 2;
+        buffer[pos++] = curr_instance.mc.obj.energy.flags;
+        buffer[pos++] = curr_instance.mc.obj.energy.energy_est;
+      } else {
+        LOG_ERR("unable to send DIO because of unsupported DAG MC type %u\n",
+               (unsigned)curr_instance.mc.type);
+        return;
+      }
+    }
+  }
+
+  /* Always add a DAG configuration option. */
+  buffer[pos++] = RPL_OPTION_DAG_CONF;
+  buffer[pos++] = 14;
+  buffer[pos++] = 0; /* No Auth, PCS = 0 */
+  buffer[pos++] = curr_instance.dio_intdoubl;
+  buffer[pos++] = curr_instance.dio_intmin;
+  buffer[pos++] = curr_instance.dio_redundancy;
+  set16(buffer, pos, curr_instance.max_rankinc);
+  pos += 2;
+  set16(buffer, pos, curr_instance.min_hoprankinc);
+  pos += 2;
+  /* OCP is in the DAG_CONF option */
+  set16(buffer, pos, curr_instance.of->ocp);
+  pos += 2;
+  buffer[pos++] = 0; /* reserved */
+  buffer[pos++] = curr_instance.default_lifetime;
+  set16(buffer, pos, curr_instance.lifetime_unit);
+  pos += 2;
+
+  /* Check if we have a prefix to send also. */
+  if(curr_instance.dag.prefix_info.length > 0) {
+    buffer[pos++] = RPL_OPTION_PREFIX_INFO;
+    buffer[pos++] = 30; /* always 30 bytes + 2 long */
+    buffer[pos++] = curr_instance.dag.prefix_info.length;
+    buffer[pos++] = curr_instance.dag.prefix_info.flags;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    set32(buffer, pos, curr_instance.dag.prefix_info.lifetime);
+    pos += 4;
+    memset(&buffer[pos], 0, 4);
+    pos += 4;
+    memcpy(&buffer[pos], &curr_instance.dag.prefix_info.prefix, 16);
+    pos += 16;
+  }
+
+  if(!rpl_get_leaf_only()) {
+    addr = addr != NULL ? addr : &rpl_multicast_addr;
+  }
+
+  LOG_INFO("sending a %s-DIO with rank %u to ",
+         uc_addr != NULL ? "unicast" : "multicast",
+         (unsigned)curr_instance.dag.rank);
+  LOG_INFO_6ADDR(addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(addr, ICMP6_RPL, RPL_CODE_DIO, pos);
+}
+/*---------------------------------------------------------------------------*/
+void
+rpl_node_alive_output(int router_uid){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  //addr = &rpl_multicast_addr;
+
+  buffer[pos] = node_id;
+  pos += 2;
+
+  LOG_INFO("sending a NODE_ALIVE as broadcast ");
+  LOG_INFO_6ADDR(&rpl_multicast_addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_NODE_ALIVE, 2);
+}
+
+void
+rpl_node_unreachable_output(int node_uid){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  //addr = &rpl_multicast_addr;
+
+  buffer[pos] = node_uid;
+  pos += 2;
+
+  LOG_INFO("sending a NODE_UNREACHABLE as broadcast ");
+  LOG_INFO_6ADDR(&rpl_multicast_addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_NODE_UNREACHABLE, 2);
+}
+
+void
+rpl_node_mobile_output(int node_uid){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  //addr = &rpl_multicast_addr;
+
+  buffer[pos] = node_uid;
+  pos += 2;
+
+  LOG_INFO("sending a NODE_MOBILE as broadcast ");
+  LOG_INFO_6ADDR(&rpl_multicast_addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_NODE_MOBILE, 2);
+}
+
+void
+rpl_node_failed_output(int num_nodes, uint16_t *nodes){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+
+  /* add the address of ER here */
+  int i = 0;
+
+  uint16_t *p = nodes;
+  for(i = 0; i < num_nodes; i++){
+    buffer[pos] = *p;
+    p++;
+    pos += 2;
+  }
+
+  LOG_INFO("sending a NODE_FAILED as unicast to... not impl yet ");
+  //LOG_INFO_6ADDR(&rpl_multicast_addr); 
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_NODE_FAILED, pos); // ism change to unicast
+
+
+}
+
+void
+rpl_router_alive_output(int router_uid){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  //addr = &rpl_multicast_addr;
+
+  buffer[pos] = router_uid;
+  pos += 2;
+
+  LOG_INFO("sending a ROUTER_ALIVE as broadcast ");
+  LOG_INFO_6ADDR(&rpl_multicast_addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_ROUTER_ALIVE, 2);
+}
+
+void
+rpl_router_unreachable_output(int router_uid){
+  unsigned char *buffer;
+  int pos;
+  pos = 0;
+
+  buffer = UIP_ICMP_PAYLOAD;
+  //addr = &rpl_multicast_addr;
+
+  buffer[pos] = router_uid;
+  pos += 2;
+
+  LOG_INFO("sending a ROUTER_UNREACHABLE as broadcast ");
+  LOG_INFO_6ADDR(&rpl_multicast_addr);
+  LOG_INFO_("\n");
+
+  uip_icmp6_send(&rpl_multicast_addr, ICMP6_RPL, PED_ROUTER_UNREACHABLE, 2);
+}
+
+#endif
 /*---------------------------------------------------------------------------*/
 static void
 dio_input(void)
@@ -677,6 +1477,16 @@ void
 rpl_icmp6_init()
 {
   uip_icmp6_register_input_handler(&dis_handler);
+
+  #if WITH_PED
+  uip_icmp6_register_input_handler(&node_new_handler); // ism registering node_new handler
+  uip_icmp6_register_input_handler(&router_new_handler); // ism registering router_new handler
+  uip_icmp6_register_input_handler(&eap_handler); // ism registering router_new handler
+  uip_icmp6_register_input_handler(&rap_handler); // ism registering router_new handler
+  uip_icmp6_register_input_handler(&router_new_ack_handler); // ism registering router_new handler
+  uip_icmp6_register_input_handler(&node_new_ack_handler); // ism registering router_new handler
+  #endif // with ped
+
   uip_icmp6_register_input_handler(&dio_handler);
   uip_icmp6_register_input_handler(&dao_handler);
 #if RPL_WITH_DAO_ACK

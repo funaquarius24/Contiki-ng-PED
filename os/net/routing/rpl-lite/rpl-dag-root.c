@@ -47,7 +47,7 @@
 /* Log configuration */
 #include "sys/log.h"
 #define LOG_MODULE "RPL"
-#define LOG_LEVEL LOG_LEVEL_RPL
+#define LOG_LEVEL LOG_LEVEL_DBG
 
 /*---------------------------------------------------------------------------*/
 void
@@ -142,7 +142,7 @@ rpl_dag_root_start(void)
   root_if = uip_ds6_addr_lookup(ipaddr);
   if(ipaddr != NULL || root_if != NULL) {
 
-    rpl_dag_init_root(RPL_DEFAULT_INSTANCE, ipaddr,
+    rpl_dag_init_root(RPL_DEFAULT_INSTANCE, ipaddr, 
       (uip_ipaddr_t *)rpl_get_global_address(), 64, UIP_ND6_RA_FLAG_AUTONOMOUS);
     rpl_dag_update_state();
 

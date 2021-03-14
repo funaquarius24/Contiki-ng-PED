@@ -685,6 +685,22 @@ uip_ds6_defrt_rm(uip_ds6_defrt_t *defrt)
   }
 }
 /*---------------------------------------------------------------------------*/
+/*
+*for leaf node, there should be 1 default router.
+*/
+/* void
+uip_ds6_defrt_clear(){
+  uip_ds6_defrt_t *d = list_head(defaultrouterlist);
+
+  uip_ds6_defrt_rm(d);
+  while (d != NULL)
+  {
+    uip_ds6_defrt_rm(d);
+    d = list_item_next(d);
+  }
+  
+} */
+/*---------------------------------------------------------------------------*/
 uip_ds6_defrt_t *
 uip_ds6_defrt_lookup(const uip_ipaddr_t *ipaddr)
 {

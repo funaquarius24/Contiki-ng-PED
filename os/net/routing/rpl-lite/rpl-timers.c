@@ -69,6 +69,16 @@ clock_time_t RPL_PROBING_DELAY_FUNC(void);
 #define PERIODIC_DELAY             ((PERIODIC_DELAY_SECONDS) * CLOCK_SECOND)
 
 static void handle_dis_timer(void *ptr);
+
+#if WITH_PED
+static void handle_node_new_timer(void *ptr);
+static void handle_router_new_timer(void *ptr);
+static void handle_router_new_ack_timer(void *ptr);
+static void handle_node_new_ack_timer(void *ptr);
+static void handle_eap_timer(void *ptr);
+static void handle_rap_timer(void *ptr);
+#endif /* with ped */
+
 static void handle_dio_timer(void *ptr);
 static void handle_unicast_dio_timer(void *ptr);
 static void send_new_dao(void *ptr);
@@ -86,6 +96,14 @@ static void handle_state_update(void *ptr);
 static struct ctimer dis_timer; /* Not part of a DAG because when not joined */
 static struct ctimer periodic_timer; /* Not part of a DAG because used for general state maintenance */
 
+#if WITH_PED
+static struct ctimer node_new_timer; /* ism timer for sending new node */
+static struct ctimer router_new_timer; /* ism timer for sending router node */
+static bool node_connected;
+static bool router_connected;
+#endif
+
+
 /*---------------------------------------------------------------------------*/
 /*------------------------------- DIS -------------------------------------- */
 /*---------------------------------------------------------------------------*/
@@ -97,6 +115,26 @@ rpl_timers_schedule_periodic_dis(void)
     ctimer_set(&dis_timer, expiration_time, handle_dis_timer, NULL);
   }
 }
+/* Node new */
+#if WITH_PED
+void
+rpl_timers_schedule_periodic_node_new(void)
+{
+  if(ctimer_expired(&node_new_timer)) {
+    clock_time_t expiration_time = RPL_NODE_NEW_INTERVAL / 2 + (random_rand() % (RPL_NODE_NEW_INTERVAL));
+    ctimer_set(&node_new_timer, expiration_time, handle_node_new_timer, NULL);
+  }
+}
+
+void
+rpl_timers_schedule_periodic_router_new(void)
+{
+  if(ctimer_expired(&router_new_timer)) {
+    clock_time_t expiration_time = RPL_ROUTER_NEW_INTERVAL / 2 + (random_rand() % (RPL_ROUTER_NEW_INTERVAL));
+    ctimer_set(&router_new_timer, expiration_time, handle_router_new_timer, NULL);
+  }
+}
+#endif /* WITH_PED */
 /*---------------------------------------------------------------------------*/
 static void
 handle_dis_timer(void *ptr)
@@ -107,9 +145,104 @@ handle_dis_timer(void *ptr)
        curr_instance.dag.rank == RPL_INFINITE_RANK)) {
     /* Send DIS and schedule next */
     rpl_icmp6_dis_output(NULL);
-    rpl_timers_schedule_periodic_dis();
+    rpl_timers_schedule_periodic_dis(); 
   }
 }
+
+#if WITH_PED
+/*---------------------------------------------------------------------------*/
+static void
+handle_node_new_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_node_new_output(NULL);
+    rpl_timers_schedule_periodic_node_new(); 
+  }
+  LOG_INFO("REACHED .....Node New.......\n");
+
+  if(0){
+    handle_router_new_ack_timer(NULL);
+    handle_node_new_ack_timer(NULL);
+    handle_eap_timer(NULL);
+    handle_rap_timer(NULL);
+  }
+}
+
+static void
+handle_router_new_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_router_new_output(NULL);
+    rpl_timers_schedule_periodic_router_new(); 
+  }
+  LOG_INFO("REACHED .....Router New.......\n");
+}
+
+static void
+handle_router_new_ack_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_router_new_output(NULL);
+    rpl_timers_schedule_periodic_router_new(); 
+  }
+  LOG_INFO("REACHED .....Router New.......\n");
+}
+
+static void
+handle_node_new_ack_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_router_new_output(NULL);
+    rpl_timers_schedule_periodic_router_new(); 
+  }
+  LOG_INFO("REACHED .....Router New.......\n");
+}
+
+static void
+handle_eap_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_router_new_output(NULL);
+    rpl_timers_schedule_periodic_router_new(); 
+  }
+  LOG_INFO("REACHED .....Router New.......\n");
+}
+
+static void
+handle_rap_timer(void *ptr)
+{
+  if(!rpl_dag_root_is_root() &&
+     (!curr_instance.used ||
+       curr_instance.dag.preferred_parent == NULL ||
+       curr_instance.dag.rank == RPL_INFINITE_RANK)) {
+    /* Send DIS and schedule next */
+    rpl_icmp6_router_new_output(NULL);
+    rpl_timers_schedule_periodic_router_new(); 
+  }
+  LOG_INFO("REACHED .....Router New.......\n");
+}
+#endif /* WITH_PED */
+
 /*---------------------------------------------------------------------------*/
 /*------------------------------- DIO -------------------------------------- */
 /*---------------------------------------------------------------------------*/
@@ -506,6 +639,10 @@ rpl_timers_init(void)
 {
   ctimer_set(&periodic_timer, PERIODIC_DELAY, handle_periodic_timer, NULL);
   rpl_timers_schedule_periodic_dis();
+  #if WITH_PED
+  rpl_timers_schedule_periodic_node_new();
+  rpl_timers_schedule_periodic_router_new();
+  #endif /* with ped */
 }
 /*---------------------------------------------------------------------------*/
 static void
@@ -521,6 +658,15 @@ handle_periodic_timer(void *ptr)
       curr_instance.dag.rank == RPL_INFINITE_RANK) {
     rpl_timers_schedule_periodic_dis(); /* Schedule DIS if needed */
   }
+
+  #if WITH_PED
+  if(!node_connected){
+    rpl_timers_schedule_periodic_node_new();
+  }
+  if(!router_connected){
+    rpl_timers_schedule_periodic_router_new();
+  }
+  #endif /* with_ped */
 
   /* Useful because part of the state update is time-dependent, e.g.,
   the meaning of last_advertised_rank changes with time */
