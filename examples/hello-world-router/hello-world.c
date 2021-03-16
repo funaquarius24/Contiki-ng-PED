@@ -91,15 +91,15 @@ PROCESS_THREAD(energest_example_process, ev, data)
     /* Update all energest times. */
     energest_flush();
 
-    printf("\nEnergest:\n");
-    printf(" CPU          %4lus LPM      %4lus DEEP LPM %4lus  Total time %lus\n",
+    printf("\nEnergest: ");
+    printf(" CPU          %4lus LPM      %4lus DEEP_LPM %4lus  Total_time %lus ",
            to_seconds(energest_type_time(ENERGEST_TYPE_CPU)),
            to_seconds(energest_type_time(ENERGEST_TYPE_LPM)),
            to_seconds(energest_type_time(ENERGEST_TYPE_DEEP_LPM)),
            to_seconds(ENERGEST_GET_TOTAL_TIME()));
-    printf(" Radio LISTEN %4lus TRANSMIT %4lue_s OFF      %4lus\n",
+    printf(" Radio_LISTEN %4lus TRANSMIT %4lus OFF      %4lus\n ",
            to_seconds(energest_type_time(ENERGEST_TYPE_LISTEN)),
-           (unsigned long) energest_type_time(ENERGEST_TYPE_TRANSMIT),
+           to_seconds(energest_type_time(ENERGEST_TYPE_TRANSMIT)),
            to_seconds(ENERGEST_GET_TOTAL_TIME()
                       - energest_type_time(ENERGEST_TYPE_TRANSMIT)
                       - energest_type_time(ENERGEST_TYPE_LISTEN)));
